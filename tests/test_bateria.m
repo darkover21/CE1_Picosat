@@ -1,14 +1,18 @@
 function test_bateria()
-%% ===== OPENSPEC =====
-% @spec        test_bateria
-% @purpose     Test unitario del integrador de batería (SOC vs corriente).
-% @inputs      (ninguna)
-% @outputs     imprime PASS/FAIL por comprobación.
-% @assumes     Convención I>0 carga / I<0 descarga. Con descarga constante el
-%              SOC debe disminuir monótonamente y cumplir el balance de carga
-%              dSOC = I*dt/(3600*C_Ah).
-% @changed     2026-06-13 creado en FASE 2.5.
-% =====================
+%TEST_BATERIA Test unitario del integrador de batería (SOC vs corriente).
+%
+%% openspec
+% @function test_bateria
+% @version 1.1
+% @changed 2026-06-13 — Creado (Fase 2.5); cabecera migrada a openspec (Fase 3).
+% @returns (ninguno; imprime PASS/FAIL por comprobación)
+% @throws AssertionError — si alguna comprobación falla (vía assert)
+% @example
+%   test_bateria();   % todas las comprobaciones deben dar PASS
+% @see simularBateriaDinamica1RC, importarParametrosBateria, run_all_tests
+%
+% Convención I>0 carga / I<0 descarga. Con descarga constante el SOC debe
+% disminuir monótonamente y cumplir el balance de carga dSOC = I*dt/(3600*C_Ah).
 
     this_dir = fileparts(mfilename('fullpath'));
     root = fileparts(this_dir);
@@ -66,3 +70,5 @@ function check(cond, msg)
     end
     assert(cond, msg);
 end
+
+%% MODIFICADO POR AGENTE — 2026-06-13 — Test creado (Fase 2.5) y documentado con cabecera openspec (Fase 3).

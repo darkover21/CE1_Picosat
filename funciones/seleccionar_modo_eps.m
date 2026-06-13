@@ -1,25 +1,37 @@
 function [pcpu, prx, ptx, modo_eps] = seleccionar_modo_eps(V_bat, soc_bat, pcpu_nom, prx_nom, ptx_nom, modo_anterior, t_actual, batteryParams, cfg_modos)
-%% ===== OPENSPEC =====
-% @spec        seleccionar_modo_eps
-% @purpose     Máquina de estados del EPS (0 Nominal / 1 Degradado / 2 Safe)
-%              con histéresis, y aplicación de los consumos útiles según modo.
-% @inputs      V_bat        : tensión de bornes actual [V] (informativa)
-%              soc_bat      : estado de carga actual [-]
-%              pcpu/prx/ptx_nom : consumos útiles nominales [W]
-%              modo_anterior: modo en el paso previo (0/1/2)
-%              t_actual     : tiempo actual [s]
-%              batteryParams: struct con la curva OCV(SOC) (soc_data/voc_data)
-%              cfg_modos    : umbrales EPS de config_eps().modos_eps
-% @outputs     pcpu, prx, ptx : consumos útiles aplicados tras la selección [W]
-%              modo_eps       : modo seleccionado (0/1/2)
-% @assumes     La entrada/salida de Safe se decide por SOC (condición primaria)
-%              y por OCV(SOC) <= V_min_ocv, NO por la tensión de bornes V_bat
-%              (que cae por I*Rint y disparaba Safe con SOC todavía alto).
-% @changed     2026-06-13 FASE 1.1: corregido el bug del umbral de tensión.
-%              Antes comparaba V_bat <= V_min_admisible (3.3 V) -> Safe falso
-%              con SOC ~= 0.80. Ahora compara OCV(SOC) <= V_min_ocv (3.05 V).
-%              Umbrales movidos a config_eps (cfg_modos); firma actualizada.
-% =====================
+%SELECCIONAR_MODO_EPS Máquina de estados del EPS y consumos útiles por modo.
+%
+%% openspec
+% @function seleccionar_modo_eps
+% @version 1.1
+% @changed 2026-06-13 — Fase 1.1: corregido el bug del umbral de tensión. Antes
+%          comparaba V_bat <= V_min_admisible (3.3 V), disparando Safe falso con
+%          SOC ~= 0.80; ahora compara OCV(SOC) <= V_min_ocv (3.05 V). Umbrales
+%          movidos a config_eps (cfg_modos) y firma actualizada. Cabecera openspec (Fase 3).
+% @param V_bat {double} [V] — Tensión de bornes actual (informativa; no decide el modo)
+% @param soc_bat {double} [-] — Estado de carga actual
+% @param pcpu_nom {double} [W] — Consumo útil nominal de CPU
+% @param prx_nom {double} [W] — Consumo útil nominal de Rx
+% @param ptx_nom {double} [W] — Consumo útil nominal de Tx
+% @param modo_anterior {double} [-] — Modo del paso previo (0 Nominal / 1 Degradado / 2 Safe)
+% @param t_actual {double} [s] — Tiempo actual de simulación
+% @param batteryParams {struct} [-] — Parámetros de batería con la curva OCV(SOC) (soc_data/voc_data)
+% @param cfg_modos {struct} [-] — Umbrales EPS de config_eps().modos_eps
+% @returns pcpu {double} [W] — Consumo útil de CPU aplicado tras la selección de modo
+% @returns prx {double} [W] — Consumo útil de Rx aplicado tras la selección de modo
+% @returns ptx {double} [W] — Consumo útil de Tx aplicado tras la selección de modo
+% @returns modo_eps {double} [-] — Modo seleccionado (0 Nominal / 1 Degradado / 2 Safe)
+% @throws interp1:NotEnoughPts — si batteryParams.soc_data/voc_data no son vectores válidos
+% @example
+%   bp  = importarParametrosBateria("dummy.txt");
+%   cfg = config_eps();
+%   [pc, pr, pt, modo] = seleccionar_modo_eps(3.29, 0.80, 0.25, 0.05, 0.15, 0, 0, bp, cfg.modos_eps);
+%   % modo == 0 (Nominal): SOC alto, no entra en Safe pese a V_bat < 3.3 V
+% @see config_eps, simular_caso_eps, simularBateriaDinamica1RC
+%
+% Supuesto clave: la entrada/salida de Safe se decide por SOC (condición
+% primaria) y por OCV(SOC) <= V_min_ocv, NO por la tensión de bornes V_bat
+% (que cae por I*Rint y disparaba Safe de forma espuria con SOC todavía alto).
 
     % Modos:
     %   0 -> nominal
@@ -144,3 +156,5 @@ function [pcpu, prx, ptx, modo_eps] = seleccionar_modo_eps(V_bat, soc_bat, pcpu_
     end
 
 end
+
+%% MODIFICADO POR AGENTE — 2026-06-13 — Fix umbral Safe basado en OCV(SOC), umbrales desde config_eps y cabecera openspec.

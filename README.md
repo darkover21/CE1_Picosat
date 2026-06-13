@@ -31,11 +31,21 @@ configuración centralizada con `config = config_eps();`.
 ### Tests
 
 ```matlab
-addpath('funciones'); addpath('tests');
-run_all_tests   % ejecuta los 3 tests unitarios e imprime un resumen
+run_all_tests   % desde la raíz del proyecto: ejecuta los 3 tests y resume
 ```
 
-Cada test imprime `PASS`/`FAIL` por comprobación y usa `assert()` con tolerancia.
+`run_all_tests.m` vive en la raíz y añade `funciones/` y `tests/` al path por sí
+mismo. Cada test imprime `PASS`/`FAIL` por comprobación y usa `assert()` con tolerancia.
+
+### Dashboard interactivo
+
+```matlab
+dashboard_eps   % panel uihtml: elige caso orbital y escenario de fallo, y traza SOC y modo EPS
+```
+
+Construido con la skill `matlab-uihtml-app-builder`. Usa un horizonte reducido y paso
+grueso, y **cachea la iluminación por caso orbital** (la parte cara, vía WMM) para que
+cada simulación sea ágil. La fidelidad completa (10 órbitas, `dt=1 s`) está en `main.m`.
 
 ---
 
@@ -46,6 +56,10 @@ Cada test imprime `PASS`/`FAIL` por comprobación y usa `assert()` con toleranci
 ├── main.m                          % Script principal: parámetros, simulación, gráficas
 ├── config_eps.m                    % Configuración centralizada (misión, reguladores, modos)
 ├── simular_caso_eps.m              % Bucle temporal principal del EPS
+├── run_all_tests.m                 % Runner de tests (raíz del proyecto)
+├── dashboard_eps.m / .html         % Panel de control interactivo (uihtml)
+├── skills/
+│   └── eps-simulator-skill/SKILL.md% Agent Skill reutilizable del flujo EPS
 ├── funciones/
 │   ├── Iluminacion_act_efe.m       % Irradiancia por panel (WMM + spin)
 │   ├── calcular_temperatura_panel.m% Modelo térmico exponencial del panel
@@ -162,6 +176,21 @@ El vector `Panel_state = [X+ X- Y+ Y-]` usa `1` (nominal 1S2P), `0.5` (una celda
 | `test_bateria` | El SOC decrece de forma monótona con descarga constante y cumple `ΔSOC = I·dt/(3600·C_Ah)`. |
 
 ---
+
+## Agent Skill reutilizable
+
+`skills/eps-simulator-skill/SKILL.md` encapsula el flujo completo del simulador para que
+otro agente lo conduzca con una sola instrucción (ejecutar, simular un fallo, añadir un
+caso orbital, cambiar un umbral, diagnosticar el modo Safe). Recoge las reglas no obvias:
+parámetros desde `config_eps`, umbral de Safe por `OCV(SOC)` (no por tensión de bornes),
+contrato de `simParams` y la advertencia de LTAN2. Generado siguiendo la skill
+`agent-skill-author` del repositorio `matlab/agent-skills-playground`.
+
+## Documentación openspec
+
+Cada función creada o modificada lleva al inicio un bloque `%% openspec` (con
+`@function`, `@version`, `@changed`, `@param`, `@returns`, `@throws`, `@example`,
+`@see`) y, al final, una línea `%% MODIFICADO POR AGENTE — <fecha> — <descripción>`.
 
 ## Pendientes (`PENDIENTE` en el código)
 

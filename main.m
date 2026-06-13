@@ -1,18 +1,22 @@
-%% ===== OPENSPEC =====
-% @spec        main
-% @purpose     Script principal del simulador EPS del PocketQube 2P: define
-%              parámetros (vía config_eps), construye el entorno (eclipse,
-%              temperatura, iluminación, batería, consumo), lanza las
-%              simulaciones y genera las gráficas y comparativas.
-% @inputs      (script) lee config_eps() y los EclipseLocator de datos_gmat.
-% @outputs     res, tablas comparativas (orbital y fallos de paneles), figuras.
-% @assumes     - Todos los parámetros físicos vienen de [[config_eps]].
-%              - Los umbrales de modo EPS son SOC/OCV (ver [[seleccionar_modo_eps]]).
-%              - LTAN2 reutiliza el GMAT de LTAN1 -> casos marcados no validados.
-% @changed     2026-06-13 FASE 1/2: config centralizada, validación GMAT por
-%              caso, casos de fallo requeridos por el enunciado, flag MPPT,
-%              eliminado el duplicado local de seleccionar_estado_paneles.
-% =====================
+%% openspec
+% @function main (script)
+% @version 1.1
+% @changed 2026-06-13 — Fases 1/2: config centralizada (config_eps), validación
+%          GMAT por caso, casos de fallo requeridos por el enunciado, flag MPPT y
+%          eliminación del duplicado local de seleccionar_estado_paneles.
+%          Cabecera migrada a openspec (Fase 3).
+% @param (script; no recibe argumentos) — lee config_eps() y los EclipseLocator de datos_gmat
+% @returns res {struct} [-] — Resultado del caso principal (en el workspace)
+% @returns tabla_casos {table} [-] — Comparativa orbital (en el workspace)
+% @returns tabla_paneles {table} [-] — Comparativa de fallos de paneles (en el workspace)
+% @throws (captura el fallo de lectura GMAT y usa eclipse sintético con warning)
+% @example
+%   main    % ejecuta la simulación principal + comparativas + gráficas
+% @see config_eps, simular_caso_eps, comparar_casos_orbitales, seleccionar_estado_paneles
+%
+% Supuestos: todos los parámetros físicos vienen de config_eps; los umbrales de
+% modo EPS son SOC/OCV (ver seleccionar_modo_eps); LTAN2 reutiliza el GMAT de
+% LTAN1, por lo que sus casos se marcan como no validados.
 %
 %% =======================================================================
 %  MATLAB es top. Top prioridades de softwares que borrar del mundo.
@@ -591,3 +595,5 @@ end
 % funciones/seleccionar_estado_paneles.m (fuente unica, con los casos de
 % fallo de dos celdas requeridos). Se elimino la copia local que la duplicaba
 % y el 'end' sobrante que quedaba al final del fichero.
+
+%% MODIFICADO POR AGENTE — 2026-06-13 — Config centralizada, validacion GMAT, casos de fallo requeridos, flag MPPT, limpieza de duplicado y cabecera openspec.

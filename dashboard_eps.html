@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+    :root {
+        --bg: #f4f6fb;
+        --card: #ffffff;
+        --ink: #1f2a44;
+        --muted: #6b7793;
+        --accent: #2f6df6;
+        --accent-2: #16a34a;
+        --border: #dfe5f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        margin: 0;
+        padding: 14px;
+    }
+    .panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 4px 14px rgba(31, 42, 68, 0.06);
+    }
+    h1 { font-size: 16px; margin: 0 0 12px 0; }
+    .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 14px;
+        align-items: end;
+    }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+    select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        font-size: 14px;
+        background: #fbfcff;
+        color: var(--ink);
+    }
+    button {
+        padding: 9px 18px;
+        border: none;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--accent);
+        cursor: pointer;
+        transition: background 0.2s, opacity 0.2s;
+        white-space: nowrap;
+    }
+    button:hover { background: #2257d6; }
+    button.busy { background: var(--muted); cursor: progress; }
+    button:disabled { opacity: 0.7; cursor: progress; }
+    .status {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--muted);
+        min-height: 18px;
+    }
+    .status.ok { color: var(--accent-2); }
+    .status.err { color: #dc2626; }
+    .metrics {
+        margin-top: 10px;
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 13px;
+    }
+    .metrics span b { color: var(--ink); }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 8px; }
+</style>
+<script type="text/javascript">
+    function setup(htmlComponent) {
+        window.htmlComponent = htmlComponent;
+
+        htmlComponent.addEventListener("SimDone", function (event) {
+            var d = event.Data;
+            setBusy(false);
+            setStatus("Simulación completada.", "ok");
+            document.getElementById("metrics").innerHTML =
+                "<span>SOC mín: <b>" + fmt(d.socMin) + "</b></span>" +
+                "<span>SOC final: <b>" + fmt(d.socFinal) + "</b></span>" +
+                "<span>% Nominal: <b>" + fmt1(d.pctNominal) + "%</b></span>" +
+                "<span>% Degradado: <b>" + fmt1(d.pctDegradado) + "%</b></span>" +
+                "<span>% Safe: <b>" + fmt1(d.pctSafe) + "%</b></span>";
+        });
+
+        htmlComponent.addEventListener("SimBusy", function (event) {
+            setBusy(true);
+            setStatus(String(event.Data), "");
+        });
+
+        htmlComponent.addEventListener("SimError", function (event) {
+            setBusy(false);
+            setStatus("Error: " + String(event.Data), "err");
+        });
+    }
+
+    function fmt(x) { return (Math.round(x * 10000) / 10000).toFixed(4); }
+    function fmt1(x) { return (Math.round(x * 10) / 10).toFixed(1); }
+
+    function setStatus(text, cls) {
+        var s = document.getElementById("status");
+        s.textContent = text;
+        s.className = "status" + (cls ? " " + cls : "");
+    }
+
+    function setBusy(isBusy) {
+        var b = document.getElementById("runBtn");
+        b.disabled = isBusy;
+        b.classList.toggle("busy", isBusy);
+        b.textContent = isBusy ? "Simulando…" : "Simular";
+    }
+
+    function runSim() {
+        var params = {
+            orbital: parseInt(document.getElementById("orbital").value, 10),
+            fault: document.getElementById("fault").value
+        };
+        setBusy(true);
+        setStatus("Simulando…", "");
+        document.getElementById("metrics").innerHTML = "";
+        window.htmlComponent.sendEventToMATLAB("RunSimulation", params);
+    }
+</script>
+</head>
+<body>
+    <div class="panel">
+        <h1>Panel de control — Simulador EPS PocketQube 2P</h1>
+        <div class="controls">
+            <div>
+                <label for="orbital">Caso orbital</label>
+                <select id="orbital">
+                    <option value="1">1 — LTAN1, sin spin (w=0)</option>
+                    <option value="2">2 — LTAN1, spin lento (w=0.1)</option>
+                    <option value="3">3 — LTAN2, sin spin (w=0)</option>
+                    <option value="4">4 — LTAN2, spin lento (w=0.1)</option>
+                </select>
+            </div>
+            <div>
+                <label for="fault">Escenario de fallo de paneles</label>
+                <select id="fault">
+                    <option value="nominal">nominal</option>
+                    <option value="fallo_celda_Xp">fallo_celda_Xp</option>
+                    <option value="fallo_celda_Xn">fallo_celda_Xn</option>
+                    <option value="fallo_celda_Yp">fallo_celda_Yp</option>
+                    <option value="fallo_celda_Yn">fallo_celda_Yn</option>
+                    <option value="fallo_dos_celdas_Xp_Yp">fallo_dos_celdas_Xp_Yp</option>
+                    <option value="fallo_dos_celdas_Xp_Yn">fallo_dos_celdas_Xp_Yn</option>
+                    <option value="fallo_dos_celdas_Xn_Yp">fallo_dos_celdas_Xn_Yp</option>
+                    <option value="fallo_dos_celdas_Xn_Yn">fallo_dos_celdas_Xn_Yn</option>
+                    <option value="fallo_dos_celdas_Xp_Xn">fallo_dos_celdas_Xp_Xn</option>
+                    <option value="fallo_dos_celdas_Yp_Yn">fallo_dos_celdas_Yp_Yn</option>
+                    <option value="fallo_panel_Xp">fallo_panel_Xp</option>
+                    <option value="fallo_panel_Xn">fallo_panel_Xn</option>
+                    <option value="fallo_panel_Yp">fallo_panel_Yp</option>
+                    <option value="fallo_panel_Yn">fallo_panel_Yn</option>
+                </select>
+            </div>
+            <button id="runBtn" onclick="runSim()">Simular</button>
+        </div>
+        <div id="status" class="status">Selecciona un caso y pulsa «Simular».</div>
+        <div id="metrics" class="metrics"></div>
+        <div class="hint">
+            Horizonte reducido y paso grueso para interactividad; la iluminación de
+            cada caso orbital se cachea tras el primer cálculo. El análisis de
+            fidelidad completa (10 órbitas, dt=1 s) está en main.m.
+        </div>
+    </div>
+</body>
+</html>

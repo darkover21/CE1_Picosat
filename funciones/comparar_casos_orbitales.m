@@ -1,19 +1,31 @@
 function [tabla_casos, resultados_casos, peor_caso] = comparar_casos_orbitales(casos_orbitales, simParams, t, h_orb, fecha)
-%% ===== OPENSPEC =====
-% @spec        comparar_casos_orbitales
-% @purpose     Simula los casos orbitales (LTAN x velocidad de spin) y los
-%              compara por energía y SOC, identificando el peor caso.
-% @inputs      casos_orbitales : struct array con .nombre, .caso_gmat,
-%              .delta_RAAN_deg, .w_spin y .gmat_validado.
-%              simParams, t, h_orb, fecha : entradas de simulación.
-% @outputs     tabla_casos, resultados_casos, peor_caso.
-% @assumes     Cada caso debe traer su propio EclipseLocator de GMAT. Si
-%              .gmat_validado=false (p.ej. LTAN2 reutiliza el GMAT de LTAN1)
-%              se emite un warning y el caso se marca en la tabla.
-% @changed     2026-06-13 FASE 1.2: añadida validación de GMAT por caso
-%              (campo gmat_validado + columna en la tabla).
-% =====================
-%COMPARAR_CASOS_ORBITALES Ejecuta los casos orbitales definidos en el main.
+%COMPARAR_CASOS_ORBITALES Ejecuta y compara los casos orbitales definidos en el main.
+%
+%% openspec
+% @function comparar_casos_orbitales
+% @version 1.1
+% @changed 2026-06-13 — Fase 1.2: añadida validación de GMAT por caso (campo
+%          gmat_validado + columna en la tabla + warning para casos no validados).
+%          Cabecera migrada a openspec (Fase 3).
+% @param casos_orbitales {struct array} [-] — Casos con .nombre, .caso_gmat,
+%          .delta_RAAN_deg [deg], .w_spin [rad/s] y .gmat_validado {logical}
+% @param simParams {struct} [-] — Parámetros base de simulación (ver simular_caso_eps)
+% @param t {double vector} [s] — Vector temporal de la simulación
+% @param h_orb {double} [km] — Altitud orbital
+% @param fecha {datetime} [-] — Época de inicio (día/mes/año para la iluminación)
+% @returns tabla_casos {table} [-] — Resumen por caso (energías, SOC, V_bat, gmat_validado)
+% @returns resultados_casos {struct} [-] — Resultado completo de cada caso simulado
+% @returns peor_caso {struct} [-] — Caso con el menor SOC mínimo
+% @throws (emite warning "comparar_casos_orbitales:gmatNoValidado" para casos sin GMAT propio)
+% @example
+%   config = config_eps();
+%   % ... armar simParams y casos_orbitales como en main.m ...
+%   [tbl, res, peor] = comparar_casos_orbitales(casos_orbitales, simParams, t, h_orb, fecha);
+% @see simular_caso_eps, Iluminacion_act_efe, seleccionar_estado_paneles
+%
+% Supuesto: cada caso debe traer su propio EclipseLocator de GMAT. Si
+% .gmat_validado=false (p.ej. LTAN2 reutiliza el GMAT de LTAN1) se emite un
+% warning y el caso se marca en la tabla como no validado.
 
 n_casos = numel(casos_orbitales);
 
@@ -112,3 +124,5 @@ fprintf('SOC_min = %.4f\n', SOC_min(idx_peor));
 fprintf('Vbat_min = %.4f V\n', Vbat_min(idx_peor));
 
 end
+
+%% MODIFICADO POR AGENTE — 2026-06-13 — Validación de GMAT por caso (gmat_validado + warning + columna) y cabecera openspec.

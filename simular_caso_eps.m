@@ -1,30 +1,32 @@
 function res = simular_caso_eps(simParams)
-%% ===== OPENSPEC =====
-% @spec        simular_caso_eps
-% @purpose     Bucle temporal principal del modelo EPS: generación de los 4
-%              paneles, consumo de cargas, selección de modo EPS, balance
-%              energético e integración de la batería.
-% @inputs      simParams : struct con dt/Nt, perfiles de consumo, iluminación
-%              (G_paneles), temperatura, batería, Panel_state, cfg_modos y
-%              el flag opcional usar_mppt_dinamico.
-% @outputs     res : struct con potencias, corrientes, V_bat, SOC, modo_eps y
-%              Pbus_panel por panel.
-% @assumes     - Convención de batería: I_bat>0 carga, I_bat<0 descarga.
-%              - Por defecto la extracción de los paneles usa eta_MPPT=0.92
-%                constante (dentro de [[curvas_IV_Temperatura]]). Si
-%                usar_mppt_dinamico=true se usa [[mppt_incremental_conductance_step]].
-% @changed     2026-06-13 FASE 1.1 firma de [[seleccionar_modo_eps]] (cfg_modos
-%              + OCV); FASE 2.6 MPPT IC dinámico opcional por panel.
-% =====================
-%
 %SIMULAR_CASO_EPS Ejecuta el bucle temporal principal del modelo EPS.
 %
-% Entradas:
-%   simParams: estructura con parámetros de simulación, perfiles de consumo,
-%              iluminación, temperatura, batería y configuración de paneles.
+%% openspec
+% @function simular_caso_eps
+% @version 1.1
+% @changed 2026-06-13 — Fase 1.1: firma de seleccionar_modo_eps (cfg_modos + OCV);
+%          Fase 2.6: MPPT Incremental Conductance dinámico opcional por panel.
+%          Cabecera migrada a openspec (Fase 3).
+% @param simParams {struct} [-] — Parámetros y entradas de simulación: dt [s], Nt,
+%          T_panel [°C], G_paneles [W/m^2], Panel_state, perfiles P_CPU/P_Rx/P_Tx [W],
+%          eta_DCDC, Vo_RL [V], batteryParams, ns_bat, np_bat, cfg_modos y el flag
+%          opcional usar_mppt_dinamico {logical}.
+% @returns res {struct} [-] — Series temporales: W_gen/W_bus [W], corrientes [A],
+%          V_bat [V], soc_bat [-], modo_eps (0/1/2), Pbus_panel [W] por panel, etc.
+% @throws (emite warning y detiene el bucle si Vbus <= 0; no lanza error)
+% @example
+%   config = config_eps();
+%   simParams = struct("Nt",10,"dt",1, ... );   % ver main.m para el armado completo
+%   simParams.cfg_modos = config.modos_eps;
+%   res = simular_caso_eps(simParams);
+%   plot(res.soc_bat);
+% @see config_eps, seleccionar_modo_eps, curvas_IV_Temperatura, mppt_incremental_conductance_step
 %
-% Salidas:
-%   res: estructura con potencias, corrientes, tensión, SOC y estados internos.
+% Supuestos:
+%   - Convención de batería: I_bat>0 carga, I_bat<0 descarga.
+%   - Por defecto la extracción de los paneles usa eta_MPPT=0.92 constante
+%     (dentro de curvas_IV_Temperatura). Si usar_mppt_dinamico=true se usa
+%     mppt_incremental_conductance_step.
 
     %% -------------------- Extraer parámetros ---------------------------
 
@@ -289,3 +291,5 @@ function res = simular_caso_eps(simParams)
         
         res.Pbus_panel = Pbus_panel;
 end
+
+%% MODIFICADO POR AGENTE — 2026-06-13 — Firma OCV de seleccionar_modo_eps, MPPT IC opcional por panel y cabecera openspec.

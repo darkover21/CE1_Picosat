@@ -1,14 +1,19 @@
 function test_seleccionar_modo_eps()
-%% ===== OPENSPEC =====
-% @spec        test_seleccionar_modo_eps
-% @purpose     Test unitario del fix del bug del umbral de tensión (FASE 1.1).
-% @inputs      (ninguna)
-% @outputs     imprime PASS/FAIL por comprobación.
-% @assumes     El modo Safe NO debe activarse con SOC=0.80 y corriente nominal
-%              de descarga, aunque la tensión de bornes caiga por debajo de los
-%              3.3 V del antiguo umbral, porque ahora se decide por OCV(SOC).
-% @changed     2026-06-13 creado en FASE 2.5.
-% =====================
+%TEST_SELECCIONAR_MODO_EPS Test unitario del fix del umbral de Safe (OCV).
+%
+%% openspec
+% @function test_seleccionar_modo_eps
+% @version 1.1
+% @changed 2026-06-13 — Creado (Fase 2.5); cabecera migrada a openspec (Fase 3).
+% @returns (ninguno; imprime PASS/FAIL por comprobación)
+% @throws AssertionError — si alguna comprobación falla (vía assert)
+% @example
+%   test_seleccionar_modo_eps();   % todas las comprobaciones deben dar PASS
+% @see seleccionar_modo_eps, config_eps, run_all_tests
+%
+% Verifica que el modo Safe NO se activa con SOC=0.80 y descarga nominal,
+% aunque la tensión de bornes caiga bajo los 3.3 V del antiguo umbral (ahora
+% la decisión es por OCV(SOC)), y el control positivo con SOC=0.50.
 
     % --- Preparación del path ---
     this_dir = fileparts(mfilename('fullpath'));
@@ -61,3 +66,5 @@ function check(cond, msg)
     end
     assert(cond, msg);
 end
+
+%% MODIFICADO POR AGENTE — 2026-06-13 — Test creado (Fase 2.5) y documentado con cabecera openspec (Fase 3).

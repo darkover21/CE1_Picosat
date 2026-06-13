@@ -1,18 +1,24 @@
 function config = config_eps()
-%% ===== OPENSPEC =====
-% @spec        config_eps
-% @purpose     Punto único de configuración del simulador EPS. Centraliza
-%              todos los parámetros físicos (misión, reguladores y umbrales
-%              de los modos EPS) para evitar valores "hardcodeados" dispersos
-%              por main.m / simParams.
-% @inputs      (ninguna)
-% @outputs     config : struct con campos .mission, .reguladores, .modos_eps
-% @assumes     - Órbita SSO LEO circular (mu, SMA del Word de documentación).
-%              - Umbrales de los modos EPS basados en SOC y en OCV(SOC),
-%                NO en la tensión de bornes (ver [[seleccionar_modo_eps]]).
-% @changed     2026-06-13 creado en la FASE 2; sustituye los literales
-%              numéricos de main.m y el antiguo simParams.V_min_admisible.
-% =====================
+%CONFIG_EPS Punto único de configuración del simulador EPS.
+%
+%% openspec
+% @function config_eps
+% @version 1.1
+% @changed 2026-06-13 — Creado (Fase 2): centraliza parámetros de misión,
+%          reguladores y umbrales EPS, sustituyendo literales de main.m y el
+%          antiguo simParams.V_min_admisible. Cabecera migrada a openspec (Fase 3).
+% @returns config {struct} [-] — Configuración con campos .mission (mu, SMA,
+%          h_orb, T_orb, N_orb, dt), .reguladores (eta_DCDC, Vo_RL, G0) y
+%          .modos_eps (umbrales de SOC, V_min_ocv y periodo_operacion).
+% @throws (no lanza errores; función pura sin efectos secundarios)
+% @example
+%   config = config_eps();
+%   dt        = config.mission.dt;          % paso temporal [s]
+%   v_min_ocv = config.modos_eps.V_min_ocv; % umbral OCV de Safe [V]
+% @see seleccionar_modo_eps, simular_caso_eps, main
+%
+% Supuestos: órbita SSO LEO circular; umbrales de modo basados en SOC y en
+% OCV(SOC), NO en la tensión de bornes (ver seleccionar_modo_eps).
 
     config = struct();
 
@@ -53,3 +59,5 @@ function config = config_eps()
     config.modos_eps.periodo_operacion = 120;   % [s] ciclo de operación del enunciado
 
 end
+
+%% MODIFICADO POR AGENTE — 2026-06-13 — Fichero creado (configuración centralizada, Fase 2) y documentado con cabecera openspec (Fase 3).
