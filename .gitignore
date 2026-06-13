@@ -1,0 +1,21 @@
+# --- MATLAB Drive ---
+.MATLABDriveTag
+
+# --- MATLAB autosave / temporales ---
+*.asv
+*.m~
+*.autosave
+slprj/
+
+# --- Artefactos generados en tiempo de ejecución ---
+# importarParametrosBateria.m regenera estos ficheros en cada ejecución
+battery.txt
+battery_import.mat
+matlab.mat
+resultados_ajuste_dinamico.txt
+
+# --- Backups de GMAT ---
+*.bak
+
+# --- Figuras exportadas (opcional) ---
+*.fig
