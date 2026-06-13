@@ -214,8 +214,12 @@ casos_paneles_comparativa = casos_paneles_requeridos;
 %parser de gmat lo siento suficiente tengo con (e)satan y patran
 gmat_path = fullfile('datos_gmat', caso_gmat);
 try
-    t_end_str   = datestr(datenum(t_start_str,'dd mmm yyyy HH:MM:SS') ...
-                          + (N_orb*T_orb)/86400, 'dd mmm yyyy HH:MM:SS');
+    % Época final = inicio + N_orb periodos. Se usa datetime (recomendado) en
+    % lugar de datenum/datestr; se entrega como char con el formato que espera
+    % get_eclipse_mask ('dd mmm yyyy HH:MM:SS').
+    t_end_dt = date + seconds(N_orb*T_orb);
+    t_end_dt.Format = 'dd MMM yyyy HH:mm:ss';
+    t_end_str = char(t_end_dt);
     eclipse_mask = get_eclipse_mask(gmat_path, dt, t_start_str, t_end_str);
     % Ajusta longitud a Nt por si el grid GMAT difiere en 1 muestra
     eclipse_mask = ajustar_longitud(eclipse_mask, Nt);
@@ -596,4 +600,4 @@ end
 % fallo de dos celdas requeridos). Se elimino la copia local que la duplicaba
 % y el 'end' sobrante que quedaba al final del fichero.
 
-%% MODIFICADO POR AGENTE — 2026-06-13 — Config centralizada, validacion GMAT, casos de fallo requeridos, flag MPPT, limpieza de duplicado y cabecera openspec.
+%% MODIFICADO POR AGENTE — 2026-06-13 — Config centralizada, validacion GMAT, casos de fallo requeridos, flag MPPT, limpieza de duplicado, cabecera openspec y modernizacion datenum/datestr->datetime.
