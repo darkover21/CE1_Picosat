@@ -47,6 +47,14 @@ Construido con la skill `matlab-uihtml-app-builder`. Usa un horizonte reducido y
 grueso, y **cachea la iluminación por caso orbital** (la parte cara, vía WMM) para que
 cada simulación sea ágil. La fidelidad completa (10 órbitas, `dt=1 s`) está en `main.m`.
 
+Si el renderizador web de MATLAB falla (error `ERR_CERT_AUTHORITY_INVALID` del motor
+CEF/`webgui`, habitual cuando un antivirus/proxy inspecciona TLS en `localhost`), usa la
+versión con figura clásica, que no depende de CEF y ofrece los mismos selectores y gráficas:
+
+```matlab
+dashboard_eps_classic
+```
+
 ---
 
 ## Estructura del repositorio
